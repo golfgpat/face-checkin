@@ -405,7 +405,7 @@
     // =========================================================================
     // ⚠️ นำลิงก์ Web App จาก Google Apps Script มาใส่ตรงนี้ (ต้องขึ้นต้นด้วย https:// และลงท้ายด้วย /exec)
     // =========================================================================
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzOC5mUZaw1fznkGneOxHXlaGovQOkEXCNqss7nmQ-qrua4n-H-xhecbgXsSABZWsm5JQ/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyivPagtDmii-v4wHbc-fJGgql3HIGLk3zDA7_9y5VDemyqn7RIb76zpzFgbF_z41sz/exec"; 
 
     const MODEL_URL = 'https://justadudewhohacks.github.io/face-api.js/models';
     const MATCH_THRESHOLD = 0.40; 
@@ -454,7 +454,7 @@
         const todayStr = `${y}-${m}-${d}`;
         document.getElementById('scanDate').value = todayStr; document.getElementById('repDate').value = todayStr; document.getElementById('repMonth').value = todayStr.slice(0, 7);
 
-        if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbzOC5mUZaw1fznkGneOxHXlaGovQOkEXCNqss7nmQ-qrua4n-H-xhecbgXsSABZWsm5JQ/exec") {
+        if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbyivPagtDmii-v4wHbc-fJGgql3HIGLk3zDA7_9y5VDemyqn7RIb76zpzFgbF_z41sz/exec") {
             document.getElementById('loadingScreen').style.display = 'none';
             return Swal.fire('ยังไม่พร้อมใช้งาน', 'กรุณานำลิงก์ Web App จาก Google Apps Script มาใส่ในไฟล์ HTML บรรทัดที่ 462', 'warning');
         }
