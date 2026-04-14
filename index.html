@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบเช็คชื่อด้วยใบหน้า AI - By ครูเอ็มเม็มเต็ม</title>
+    <title>ระบบเช็คชื่อด้วยใบหน้า AI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +15,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -404,11 +403,12 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // =========================================================================
-    // ⚠️ นำลิงก์ Web App จาก Google Apps Script มาใส่ตรงนี้ (ต้องขึ้นต้นด้วย https:// และลงท้ายด้วย /exec)
+    // ลิงก์เชื่อมต่อฐานข้อมูล Google Apps Script
     // =========================================================================
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxDg3-2K_rk_vWcdQGuCCFUri7sgWLxyDFFgQluuYXtimeRU16HpwjOd2die0fxewr2Tg/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyaCTmXsqZG5EzN_sjpRuTf3WrOVb4XKk6o43tF7IyUdLAqGRvXnizxu04C2aFF3qxzvg/exec"; 
 
-   
+    // ใช้ CDN ที่เร็วกว่า เพื่อแก้ปัญหาโหลด AI Model ช้าหรือโดนบล็อก
+    const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
     const MATCH_THRESHOLD = 0.40; 
     const STABILIZATION_FRAMES = 5; 
     
@@ -424,19 +424,19 @@
 
     function showPopup(msg, sub, type = 'success') { Toast.fire({ icon: type, title: msg, text: sub }); }
 
-   // --- ฟังก์ชันติดต่อกับ Google Apps Script (เวอร์ชันทะลุบล็อก CORS) ---
+    // --- ฟังก์ชันติดต่อกับ Google Apps Script (ทะลุบล็อก CORS 100%) ---
     async function fetchFromGAS(action, data = {}) {
-        if (!GAS_API_URL || GAS_API_URL === "ลิงก์_WEB_APP_ของคุณครู_ที่นี่") {
-            Swal.fire('แจ้งเตือน', 'ยังไม่ได้ใส่ลิงก์ API ในโค้ด', 'error');
+        if (!GAS_API_URL || !GAS_API_URL.includes("script.google.com")) {
+            Swal.fire('แจ้งเตือน', 'ยังไม่ได้ใส่ลิงก์ API ที่ถูกต้อง', 'error');
             return null;
         }
         
         try {
             const response = await fetch(GAS_API_URL, {
                 method: "POST",
-                redirect: "follow", // ให้ตามลิงก์ Google ไป
+                redirect: "follow",
                 headers: {
-                    "Content-Type": "text/plain;charset=utf-8", // หลอกเบราว์เซอร์ว่าเป็นข้อความธรรมดา เพื่อลดการบล็อก
+                    "Content-Type": "text/plain;charset=utf-8",
                 },
                 body: JSON.stringify({ action: action, data: data })
             });
@@ -455,13 +455,13 @@
         const todayStr = `${y}-${m}-${d}`;
         document.getElementById('scanDate').value = todayStr; document.getElementById('repDate').value = todayStr; document.getElementById('repMonth').value = todayStr.slice(0, 7);
 
-        if (GAS_API_URL === "https://script.google.com/macros/s/AKfycbxDg3-2K_rk_vWcdQGuCCFUri7sgWLxyDFFgQluuYXtimeRU16HpwjOd2die0fxewr2Tg/exec") {
+        if (!GAS_API_URL || !GAS_API_URL.includes("script.google.com")) {
             document.getElementById('loadingScreen').style.display = 'none';
-            return Swal.fire('ยังไม่พร้อมใช้งาน', 'กรุณานำลิงก์ Web App จาก Google Apps Script มาใส่ในไฟล์ HTML บรรทัดที่ 462', 'warning');
+            return Swal.fire('ยังไม่พร้อมใช้งาน', 'กรุณาใส่ลิงก์ Web App จาก Google Apps Script ให้ถูกต้อง', 'warning');
         }
 
         try {
-            document.getElementById('loadingStatus').innerText = "Loading AI Models...";
+            document.getElementById('loadingStatus').innerText = "กำลังเชื่อมต่อระบบ AI...";
             await Promise.all([
                 faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
                 faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
@@ -472,6 +472,7 @@
         } catch(e) { 
             console.error(e); 
             document.getElementById('loadingStatus').innerText = "Model Load Failed";
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดไฟล์ AI ได้ กรุณาตรวจสอบอินเทอร์เน็ต', 'error');
         }
     };
 
@@ -480,7 +481,6 @@
         document.getElementById('loadingStatus').innerText = "กำลังเชื่อมต่อฐานข้อมูล...";
         
         try {
-            // โหลดข้อมูลแบบขนาน 3 อย่างพร้อมกัน เพื่อความรวดเร็ว
             const [studentsRes, scheduleRes, attendanceRes] = await Promise.all([
                 fetchFromGAS("getAllStudents"),
                 fetchFromGAS("getSchedule"),
@@ -549,6 +549,7 @@
             await fetchFromGAS("saveSchedule", scheduleDB);
             syncData();
             document.getElementById('schClass').value = ""; document.getElementById('schTeacher').value = "";
+            showPopup('สำเร็จ', 'เพิ่มตารางสอนเรียบร้อย', 'success');
         } catch(e) {
             document.getElementById('loadingScreen').style.display = 'none';
             Swal.fire('ข้อผิดพลาด', 'ไม่สามารถบันทึกตารางสอนได้', 'error');
@@ -723,7 +724,6 @@
             }
 
             txt.innerText = "กำลังบันทึก...";
-            
             const studentData = {id, name, sClass: document.getElementById('regClass').value, sNo: document.getElementById('regNo').value, descriptor: Array.from(det.descriptor)};
             const res = await fetchFromGAS("saveStudentData", studentData);
             
@@ -1026,22 +1026,4 @@
             title: 'ล้างประวัติทั้งหมด?',
             text: "พิมพ์คำว่า CONFIRM เพื่อยืนยันการลบ",
             input: 'text', icon: 'warning', inputPlaceholder: 'CONFIRM',
-            showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'ลบประวัติ', cancelButtonText: 'ยกเลิก'
-        });
-
-        if (text === 'CONFIRM') {
-            document.getElementById('loadingScreen').style.display = 'flex';
-            try {
-                await fetchFromGAS("clearAttendanceHistory");
-                Swal.fire('ล้างประวัติสำเร็จ', 'ข้อมูลถูกล้างเรียบร้อยแล้ว', 'success');
-                syncData(); 
-            } catch(e) {
-                document.getElementById('loadingScreen').style.display = 'none';
-            }
-        } else if (text && text !== 'CONFIRM') {
-            Swal.fire('ยกเลิก', 'คุณพิมพ์คำยืนยันไม่ถูกต้อง', 'info');
-        }
-    };
-</script>
-</body>
-</html>
+            showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor:
